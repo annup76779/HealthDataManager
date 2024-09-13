@@ -12,7 +12,7 @@ from .serializers import UserSerializer
 @api_view(["POST"])
 def signup_api(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
+        data = request.data
         name = data.get('name')
         role = data.get('role')
         username = data.get('username')
