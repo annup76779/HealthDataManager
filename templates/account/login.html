@@ -1,0 +1,57 @@
+{% extends "../index.html" %}
+{% load static %}
+{% block content %}
+    <div class="center-form-main">
+        <!-- Signup Form Card -->
+        <div class="col-11 col-md-6 col-lg-4 card shadow-lg form-container">
+            <div class="card-body">
+                <h3 class="text-center mb-4">Login</h3>
+                <form>
+                    <div class="mb-3">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="username"
+                                   class="form-control"
+                                   id="username"
+                                   placeholder="Enter your usernaem"
+                                   required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password"
+                                   class="form-control"
+                                   id="password"
+                                   placeholder="Enter your password"
+                                   required />
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Sign Up</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <p>
+                                Don't have an account?
+                                <a href="{% url "signup" %}">Sign Up</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+{% block javascript %}
+    <script src="{% static 'js/auth.js' %}"></script>
+    <script>
+        const _authService = new AuthService();
+        async function handleSubmit(event) {
+            event.preventDefault()
+           await _authService.handleLogin(event);
+           return false;
+        }
+
+        window.onload = () => {
+            // Attach the handleSignup function to the form submit event
+            document.querySelector("form").addEventListener("submit", handleSubmit);
+        }
+    </script>
+{% endblock javascript %}

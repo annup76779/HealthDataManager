@@ -1,0 +1,23 @@
+:root {
+    --blue: #6495ed;
+    --white: #faf0e6;
+    --heading: 30px;
+}
+
+.center-form-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--bs-body-bg);
+    transition: background-color 0.3s;
+}
+
+.card {
+    max-width: 400px;
+    padding: 1.5rem;
+}
+
+.form-container {
+    max-width: 100%;
+}
