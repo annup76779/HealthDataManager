@@ -46,10 +46,12 @@ async function submitDailyCheckup(event) {
         } else {
             // Handle errors by showing an alert with the message
             const errorData = await response.json();
-            alert(JSON.stringify(errorMessage));
+            notification.error(JSON.stringify(errorMessage));
         }
     } catch (error) {
-        alert("An unexpected error occurred. Please try again later.");
+        notification.error(
+            "An unexpected error occurred. Please try again later."
+        );
     }
 }
 

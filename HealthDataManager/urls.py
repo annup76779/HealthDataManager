@@ -19,7 +19,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from HealthDataManager.views import index
+
 urlpatterns = [
+    path('', index, name='index'),
     path('admin/', admin.site.urls),
     path('auth/', include("account.urls")),
     path("api/", include("patient.urls")),

@@ -1,98 +1,57 @@
 {% extends "../index.html" %}
-{% load static %}
 {% block content %}
-    <form id="dailyCheckupForm" class="card">
-        <div class="mb-3">
-            <label for="blood_sugar_morning" class="form-label">Blood Sugar Morning (Before breakfast)</label>
-            <input type="number"
-                   step="0.01"
-                   class="form-control"
-                   id="blood_sugar_morning"
-                   name="blood_sugar_morning">
-        </div>
-        <div class="mb-3">
-            <label for="blood_sugar_after_breakfast" class="form-label">Blood Sugar After Breakfast</label>
-            <input type="number"
-                   step="0.01"
-                   class="form-control"
-                   id="blood_sugar_after_breakfast"
-                   name="blood_sugar_after_breakfast">
-        </div>
-        <div class="mb-3">
-            <label for="blood_sugar_before_lunch" class="form-label">Blood Sugar Before Lunch</label>
-            <input type="number"
-                   step="0.01"
-                   class="form-control"
-                   id="blood_sugar_before_lunch"
-                   name="blood_sugar_before_lunch">
-        </div>
-        <div class="mb-3">
-            <label for="blood_sugar_after_lunch" class="form-label">Blood Sugar After Lunch</label>
-            <input type="number"
-                   step="0.01"
-                   class="form-control"
-                   id="blood_sugar_after_lunch"
-                   name="blood_sugar_after_lunch">
-        </div>
-        <div class="mb-3">
-            <label for="blood_sugar_before_dinner" class="form-label">Blood Sugar Before Dinner</label>
-            <input type="number"
-                   step="0.01"
-                   class="form-control"
-                   id="blood_sugar_before_dinner"
-                   name="blood_sugar_before_dinner">
-        </div>
-        <div class="mb-3">
-            <label for="blood_sugar_after_dinner" class="form-label">Blood Sugar After Dinner</label>
-            <input type="number"
-                   step="0.01"
-                   class="form-control"
-                   id="blood_sugar_after_dinner"
-                   name="blood_sugar_after_dinner">
-        </div>
-        <div class="mb-3">
-            <label for="blood_sugar_before_bedtime" class="form-label">Blood Sugar Before Bedtime</label>
-            <input type="number"
-                   step="0.01"
-                   class="form-control"
-                   id="blood_sugar_before_bedtime"
-                   name="blood_sugar_before_bedtime">
-        </div>
-        <div class="mb-3">
-            <label for="diet_details" class="form-label">Diet Details</label>
-            <textarea class="form-control" id="diet_details" name="diet_details" rows="3"></textarea>
-        </div>
-        <div class="mb-3">
-            <label for="exercise_minutes" class="form-label">Exercise Minutes</label>
-            <input type="number"
-                   class="form-control"
-                   id="exercise_minutes"
-                   name="exercise_minutes">
-        </div>
-        <div class="mb-3 form-check">
-            <input type="checkbox"
-                   class="form-check-input"
-                   id="medication_taken"
-                   name="medication_taken">
-            <label class="form-check-label" for="medication_taken">Medication Taken</label>
-        </div>
-        <div class="mb-3 form-check">
-            <input type="checkbox"
-                   class="form-check-input"
-                   id="foot_check_completed"
-                   name="foot_check_completed">
-            <label class="form-check-label" for="foot_check_completed">Foot Check Completed</label>
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+    <div class="container my-4">
+        <h2 class="text-center mb-4">Daily Health Data Log</h2>
+        <form class="m-auto" method="post" action="{% url 'health_data_view' %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">
+                        <h4>Blood Glucose</h4>
+                        {{ blood_glucose_form.as_p }}
+                    </div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">
+                        <h4>Medication</h4>
+                        {{ medication_form.as_p }}
+                    </div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">
+                        <h4>Insulin Use</h4>
+                        {{ insulin_use_form.as_p }}
+                    </div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ blood_pressure_form.as_p }}</div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ physical_activity_form.as_p }}</div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ step_count_form.as_p }}</div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ dietary_intake_form.as_p }}</div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ weight_form.as_p }}</div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ sleep_patterns_form.as_p }}</div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ mood_form.as_p }}</div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ hydration_form.as_p }}</div>
+                </div>
+                <div class="form-section col-12 col-md-6 col-lg-4">
+                    <div class="form-content">{{ foot_health_form.as_p }}</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
 {% endblock content %}
-{% block javascript %}
-    <script src="{% static 'js/daily_detail.js' %}"></script>
-    <script>
-        window.onload = () => {
-            document
-                .getElementById("dailyCheckupForm")
-                .addEventListener("submit", submitDailyCheckup);
-        }
-    </script>
-{% endblock javascript %}

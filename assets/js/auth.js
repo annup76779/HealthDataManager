@@ -90,7 +90,7 @@ class AuthService {
                     alert("Docter Logged in successfully");
                 } else if (data.role === "Patient") {
                     // Redirect to home page after successful signup
-                    window.location.href = "/api/add_daily_details";
+                    window.location.href = "/api/health-data/";
                 }
             } else {
                 // If there's an error, parse the error message from the response and alert it
