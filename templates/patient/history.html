@@ -2,7 +2,24 @@
 {% block content %}
     <div class="container my-4">
         <h2 class="text-center mb-4">Health Data History</h2>
+        <form onsubmit="handleFilter(event)">
+            <div class="row my-3">
+                <h5>Filter</h5>
+                <div class="col-6">
+                    <input type="date" class="form-control" name="start_date" max="{{ today }}" required>
+                </div>
+                <div class="col-6">
+                    <input type="date" class="form-control" name="end_date" max="{{ today }}">
+                </div>
+                <div class="row my-2">
+                    <div class="col-1">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
         <!-- Accordion for displaying history -->
+        <h5>History</h5>
         <div class="accordion" id="healthDataAccordion"></div>
         <!-- Pagination controls -->
         <div class="d-flex justify-content-center my-3">
@@ -13,124 +30,128 @@
 {% endblock content %}
 {% block javascript %}
     <script>
-    // Existing data object (this could already have data grouped by date)
-    let existingData = {};
-
-    // Function to merge new data into an existing object, arranged date-wise
-    function getGroupedData(records) {
-        response = {}
-        records.forEach(record => {
-            record.blood_glucose.forEach(bloodGlucose => {
-                if(response[bloodGlucose.date]) {
-                    response[bloodGlucose.date].blood_glucose = bloodGlucose
-                } else {
-                    response[bloodGlucose.date] = {}
-                    response[bloodGlucose.date].blood_glucose = bloodGlucose
-                }
-            });
-            record.medications.forEach(medications => {
-                if(response[medications.date]) {
-                    response[medications.date].medications = medications
-                } else {
-                    response[medications.date] = {}
-                    response[medications.date].medications = medications
-                }
-            });
-            record.insulin_use.forEach(insulin_use => {
-                if(response[insulin_use.date]) {
-                    response[insulin_use.date].insulin_use = insulin_use
-                } else {
-                    response[insulin_use.date] = {}
-                    response[insulin_use.date].insulin_use = insulin_use
-                }
-            });
-            record.blood_pressure.forEach(blood_pressure => {
-                if(response[blood_pressure.date]) {
-                    response[blood_pressure.date].blood_pressure = blood_pressure
-                } else {
-                    response[blood_pressure.date] = {}
-                    response[blood_pressure.date].blood_pressure = blood_pressure
-                }
-            });
-            record.physical_activity.forEach(physical_activity => {
-                if(response[physical_activity.date]) {
-                    response[physical_activity.date].physical_activity = physical_activity
-                } else {
-                    response[physical_activity.date] = {}
-                    response[physical_activity.date].physical_activity = physical_activity
-                }
-            });
-            record.step_count.forEach(step_count => {
-                if(response[step_count.date]) {
-                    response[step_count.date].step_count = step_count
-                } else {
-                    response[step_count.date] = {}
-                    response[step_count.date].step_count = step_count
-                }
-            });
-            record.dietary_intake.forEach(dietary_intake => {
-                if(response[dietary_intake.date]) {
-                    response[dietary_intake.date].dietary_intake = dietary_intake
-                } else {
-                    response[dietary_intake.date] = {}
-                    response[dietary_intake.date].dietary_intake = dietary_intake
-                }
-            });
-            record.weight.forEach(weight => {
-                if(response[weight.date]) {
-                    response[weight.date].weight = weight
-                } else {
-                    response[weight.date] = {}
-                    response[weight.date].weight = weight
-                }
-            });
-            record.sleep_patterns.forEach(sleep_patterns => {
-                if(response[sleep_patterns.date]) {
-                    response[sleep_patterns.date].sleep_patterns = sleep_patterns
-                } else {
-                    response[sleep_patterns.date] = {}
-                    response[sleep_patterns.date].sleep_patterns = sleep_patterns
-                }
-            });
-            record.mood.forEach(mood => {
-                if(response[mood.date]) {
-                    response[mood.date].mood = mood
-                } else {
-                    response[mood.date] = {}
-                    response[mood.date].mood = mood
-                }
-            });
-            record.hydration.forEach(hydration => {
-                if(response[hydration.date]) {
-                    response[hydration.date].hydration = hydration
-                } else {
-                    response[hydration.date] = {}
-                    response[hydration.date].hydration = hydration
-                }
-            });
-            record.foot_health_check.forEach(foot_health_check => {
-                if(response[foot_health_check.date]) {
-                    response[foot_health_check.date].foot_health_check = foot_health_check
-                } else {
-                    response[foot_health_check.date] = {}
-                    response[foot_health_check.date].foot_health_check = foot_health_check
-                }
-            });
-        })
-
-        console.log(response);
-        return response;
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
+        // Existing data object (this could already have data grouped by date)
+        let existingData = {};
         let currentPage = 1;
         const accordion = document.getElementById("healthDataAccordion");
         const nextPageBtn = document.getElementById("next-page");
         const prevPageBtn = document.getElementById("prev-page");
 
+        // Function to merge new data into an existing object, arranged date-wise
+        function getGroupedData(records) {
+            response = {}
+            records.forEach(record => {
+                record.blood_glucose.forEach(bloodGlucose => {
+                    if(response[bloodGlucose.date]) {
+                        response[bloodGlucose.date].blood_glucose = bloodGlucose
+                    } else {
+                        response[bloodGlucose.date] = {}
+                        response[bloodGlucose.date].blood_glucose = bloodGlucose
+                    }
+                });
+                record.medications.forEach(medications => {
+                    if(response[medications.date]) {
+                        response[medications.date].medications = medications
+                    } else {
+                        response[medications.date] = {}
+                        response[medications.date].medications = medications
+                    }
+                });
+                record.insulin_use.forEach(insulin_use => {
+                    if(response[insulin_use.date]) {
+                        response[insulin_use.date].insulin_use = insulin_use
+                    } else {
+                        response[insulin_use.date] = {}
+                        response[insulin_use.date].insulin_use = insulin_use
+                    }
+                });
+                record.blood_pressure.forEach(blood_pressure => {
+                    if(response[blood_pressure.date]) {
+                        response[blood_pressure.date].blood_pressure = blood_pressure
+                    } else {
+                        response[blood_pressure.date] = {}
+                        response[blood_pressure.date].blood_pressure = blood_pressure
+                    }
+                });
+                record.physical_activity.forEach(physical_activity => {
+                    if(response[physical_activity.date]) {
+                        response[physical_activity.date].physical_activity = physical_activity
+                    } else {
+                        response[physical_activity.date] = {}
+                        response[physical_activity.date].physical_activity = physical_activity
+                    }
+                });
+                record.step_count.forEach(step_count => {
+                    if(response[step_count.date]) {
+                        response[step_count.date].step_count = step_count
+                    } else {
+                        response[step_count.date] = {}
+                        response[step_count.date].step_count = step_count
+                    }
+                });
+                record.dietary_intake.forEach(dietary_intake => {
+                    if(response[dietary_intake.date]) {
+                        response[dietary_intake.date].dietary_intake = dietary_intake
+                    } else {
+                        response[dietary_intake.date] = {}
+                        response[dietary_intake.date].dietary_intake = dietary_intake
+                    }
+                });
+                record.weight.forEach(weight => {
+                    if(response[weight.date]) {
+                        response[weight.date].weight = weight
+                    } else {
+                        response[weight.date] = {}
+                        response[weight.date].weight = weight
+                    }
+                });
+                record.sleep_patterns.forEach(sleep_patterns => {
+                    if(response[sleep_patterns.date]) {
+                        response[sleep_patterns.date].sleep_patterns = sleep_patterns
+                    } else {
+                        response[sleep_patterns.date] = {}
+                        response[sleep_patterns.date].sleep_patterns = sleep_patterns
+                    }
+                });
+                record.mood.forEach(mood => {
+                    if(response[mood.date]) {
+                        response[mood.date].mood = mood
+                    } else {
+                        response[mood.date] = {}
+                        response[mood.date].mood = mood
+                    }
+                });
+                record.hydration.forEach(hydration => {
+                    if(response[hydration.date]) {
+                        response[hydration.date].hydration = hydration
+                    } else {
+                        response[hydration.date] = {}
+                        response[hydration.date].hydration = hydration
+                    }
+                });
+                record.foot_health_check.forEach(foot_health_check => {
+                    if(response[foot_health_check.date]) {
+                        response[foot_health_check.date].foot_health_check = foot_health_check
+                    } else {
+                        response[foot_health_check.date] = {}
+                        response[foot_health_check.date].foot_health_check = foot_health_check
+                    }
+                });
+            })
+            return response;
+        }
+
+        
+
+        const handleFilter = (event) => {
+            event.preventDefault();
+            let formData = new FormData(event.target);
+            fetchData(currentPage, formData.get("start_date"), formData.get("end_date"));
+        }
+
         // Function to fetch paginated data from the API
-        function fetchData(page = 1) {
-            fetch(`/api/get-health-data?page=${page}`) // Adjust the API URL according to your router configuration
+        function fetchData(page = 1, start_date="", end_date="") {
+            fetch(`/api/get-health-data?page=${page}${start_date ? "&start_date="+start_date: ""}${end_date ? "&end_date="+end_date: ""}`) // Adjust the API URL according to your router configuration
                 .then((response) => response.json())
                 .then((data) => {
                     groupedData = getGroupedData(data.results)
@@ -145,7 +166,6 @@
             accordion.innerHTML = ""; // Clear previous data
 
             Object.keys(records).forEach((key, index) => {
-                console.log(key, records[key])
                 // Assuming all arrays are of the same size, just use the first array to get the date
                 const date = new Date(key).toLocaleDateString();
                 
@@ -313,8 +333,9 @@
             fetchData(currentPage);
         });
 
-        // Initial fetch of the data
-        fetchData(currentPage);
-    });
+        window.onload = () => { 
+            // Initial fetch of the data
+            fetchData(currentPage);
+        }
     </script>
 {% endblock javascript %}

@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
@@ -110,24 +112,48 @@ class FootHealthCheckViewSet(viewsets.ModelViewSet):
 
 
 class DailyHealthDataView(APIView):
-    def get(self, request, *args, **kwargs):
-        today = timezone.now().date()
+    def get(self, request):
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        if start_date:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+
+        if end_date:
+            print("End Date", end_date)
+            end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+        elif start_date:
+            end_date = start_date + timedelta(days=1)
+
         pagination = StandardResultsSetPagination()
 
-        # Collect all data for today (or adjust to fetch data for a different date range if needed)
-        blood_glucose = BloodGlucose.objects.order_by('-date')
-        medications = Medication.objects.order_by('-date')
-        insulin_use = InsulinUse.objects.order_by('-date')
-        blood_pressure = BloodPressure.objects.order_by('-date')
-        physical_activity = PhysicalActivity.objects.order_by('-date')
-        step_count = StepCount.objects.order_by('-date')
-        dietary_intake = DietaryIntake.objects.order_by('-date')
-        weight = Weight.objects.order_by('-date')
-        sleep_patterns = SleepPatterns.objects.order_by('-date')
-        mood = MoodAndEmotionalWellBeing.objects.order_by('-date')
-        hydration = Hydration.objects.order_by('-date')
-        foot_health_check = FootHealthCheck.objects.order_by('-date')
-
+        if start_date and end_date:
+            # Collect all data for today (or adjust to fetch data for a different date range if needed)
+            blood_glucose = BloodGlucose.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            medications = Medication.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            insulin_use = InsulinUse.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            blood_pressure = BloodPressure.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            physical_activity = PhysicalActivity.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            step_count = StepCount.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            dietary_intake = DietaryIntake.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            weight = Weight.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            sleep_patterns = SleepPatterns.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            mood = MoodAndEmotionalWellBeing.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            hydration = Hydration.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            foot_health_check = FootHealthCheck.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+        else:
+            # Collect all data for today (or adjust to fetch data for a different date range if needed)
+            blood_glucose = BloodGlucose.objects.order_by('-date')
+            medications = Medication.objects.order_by('-date')
+            insulin_use = InsulinUse.objects.order_by('-date')
+            blood_pressure = BloodPressure.objects.order_by('-date')
+            physical_activity = PhysicalActivity.objects.order_by('-date')
+            step_count = StepCount.objects.order_by('-date')
+            dietary_intake = DietaryIntake.objects.order_by('-date')
+            weight = Weight.objects.order_by('-date')
+            sleep_patterns = SleepPatterns.objects.order_by('-date')
+            mood = MoodAndEmotionalWellBeing.objects.order_by('-date')
+            hydration = Hydration.objects.order_by('-date')
+            foot_health_check = FootHealthCheck.objects.order_by('-date')
         # Combine all the data into one response
         combined_data = {
             'blood_glucose': blood_glucose,

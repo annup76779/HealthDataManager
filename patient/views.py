@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .forms import (
@@ -21,7 +23,8 @@ def add_daily_details(request):
 
 @login_required
 def get_daily_details(request):
-    return render(request, "patient/history.html")
+    today = datetime.today().strftime("%Y-%m-%d")
+    return render(request, "patient/history.html", {"today": today})
 
 
 @login_required
