@@ -1,9 +1,13 @@
 from datetime import datetime, timedelta
 
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from account.models import User
 from .models import (
     BloodGlucose, Medication, InsulinUse, BloodPressure,
     PhysicalActivity, StepCount, DietaryIntake, Weight,
@@ -112,6 +116,7 @@ class FootHealthCheckViewSet(viewsets.ModelViewSet):
 
 
 class DailyHealthDataView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         start_date = request.GET.get('start_date')
         end_date = request.GET.get('end_date')
@@ -176,3 +181,34 @@ class DailyHealthDataView(APIView):
         # Apply pagination to the serialized data
         paginated_data = pagination.paginate_queryset([serializer.data], request)
         return pagination.get_paginated_response(paginated_data)
+
+
+class DoctorsDropdown(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        search = request.GET.get("search")
+        userObjs = User.objects
+        if search and search.strip():
+            userObjs = userObjs.filter(Q(username__icontains=search.strip()) | Q(first_name__icontains=search.strip()))
+
+        response = [{"id": doc.id, "text": doc.first_name} for doc in userObjs.all()[:30]]
+        return Response({"doctors": response})
+
+
+class ManageDailyLogAccess(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
+        doctors = request.data.get("doctors")
+        print(doctors)
+        if start_date:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+
+        if end_date:
+            print("End Date", end_date)
+            end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+        elif start_date:
+            end_date = start_date + timedelta(days=1)

@@ -1,179 +1,246 @@
 {% extends "../index.html" %}
+{% block extra_css %}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+          rel="stylesheet" />
+{% endblock extra_css %}
 {% block content %}
+    {% csrf_token %}
     <div class="container my-4">
-        <h2 class="text-center mb-4">Health Data History</h2>
-        <form onsubmit="handleFilter(event)">
-            <div class="row my-3">
-                <h5>Filter</h5>
-                <div class="col-6">
-                    <input type="date" class="form-control" name="start_date" max="{{ today }}" required>
-                </div>
-                <div class="col-6">
-                    <input type="date" class="form-control" name="end_date" max="{{ today }}">
-                </div>
-                <div class="row my-2">
-                    <div class="col-1">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+        <section>
+            <h2 class="text-center mb-4">Health Data History</h2>
+            <form onsubmit="handleFilter(event)">
+                <div class="row my-3">
+                    <h5>Filter</h5>
+                    <div class="col-6">
+                        <input type="date"
+                               class="form-control"
+                               name="start_date"
+                               max="{{ today }}"
+                               required />
+                    </div>
+                    <div class="col-6">
+                        <input type="date" class="form-control" name="end_date" max="{{ today }}" />
+                    </div>
+                    <div class="my-2">
+                        <button type="submit" class="btn btn-outline-secondary">Filter</button>
+                        <button type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#staticBackdrop">Send to Doctor</button>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </section>
         <!-- Accordion for displaying history -->
-        <h5>History</h5>
-        <div class="accordion" id="healthDataAccordion"></div>
-        <!-- Pagination controls -->
-        <div class="d-flex justify-content-center my-3">
-            <button id="prev-page" class="btn btn-secondary me-2" disabled>Previous</button>
-            <button id="next-page" class="btn btn-primary">Next</button>
+        <section>
+            <h5>History</h5>
+            <div class="accordion" id="healthDataAccordion"></div>
+            <!-- Pagination controls -->
+            <div class="d-flex justify-content-center my-3">
+                <button id="prev-page" class="btn btn-secondary me-2" disabled>Previous</button>
+                <button id="next-page" class="btn btn-primary">Next</button>
+            </div>
+        </section>
+        <!-- Modal -->
+        <div class="modal fade"
+             id="staticBackdrop"
+             data-bs-backdrop="static"
+             data-bs-keyboard="false"
+             tabindex="-1"
+             aria-labelledby="staticBackdropLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Send to Doctor</h1>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <form>
+                        <div class="modal-body">
+                            <label for="doctors">Select doctor</label>
+                            <select class="select2 select2-multiple form-control"
+                                    id="doctors"
+                                    name="doctors"
+                                    required
+                                    style="width: 100%"></select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock content %}
 {% block javascript %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        // Existing data object (this could already have data grouped by date)
-        let existingData = {};
-        let currentPage = 1;
-        const accordion = document.getElementById("healthDataAccordion");
-        const nextPageBtn = document.getElementById("next-page");
-        const prevPageBtn = document.getElementById("prev-page");
+    // Existing data object (this could already have data grouped by date)
+    let existingData = {};
+    let currentPage = 1;
+    const accordion = document.getElementById("healthDataAccordion");
+    const nextPageBtn = document.getElementById("next-page");
+    const prevPageBtn = document.getElementById("prev-page");
 
-        // Function to merge new data into an existing object, arranged date-wise
-        function getGroupedData(records) {
-            response = {}
-            records.forEach(record => {
-                record.blood_glucose.forEach(bloodGlucose => {
-                    if(response[bloodGlucose.date]) {
-                        response[bloodGlucose.date].blood_glucose = bloodGlucose
-                    } else {
-                        response[bloodGlucose.date] = {}
-                        response[bloodGlucose.date].blood_glucose = bloodGlucose
-                    }
-                });
-                record.medications.forEach(medications => {
-                    if(response[medications.date]) {
-                        response[medications.date].medications = medications
-                    } else {
-                        response[medications.date] = {}
-                        response[medications.date].medications = medications
-                    }
-                });
-                record.insulin_use.forEach(insulin_use => {
-                    if(response[insulin_use.date]) {
-                        response[insulin_use.date].insulin_use = insulin_use
-                    } else {
-                        response[insulin_use.date] = {}
-                        response[insulin_use.date].insulin_use = insulin_use
-                    }
-                });
-                record.blood_pressure.forEach(blood_pressure => {
-                    if(response[blood_pressure.date]) {
-                        response[blood_pressure.date].blood_pressure = blood_pressure
-                    } else {
-                        response[blood_pressure.date] = {}
-                        response[blood_pressure.date].blood_pressure = blood_pressure
-                    }
-                });
-                record.physical_activity.forEach(physical_activity => {
-                    if(response[physical_activity.date]) {
-                        response[physical_activity.date].physical_activity = physical_activity
-                    } else {
-                        response[physical_activity.date] = {}
-                        response[physical_activity.date].physical_activity = physical_activity
-                    }
-                });
-                record.step_count.forEach(step_count => {
-                    if(response[step_count.date]) {
-                        response[step_count.date].step_count = step_count
-                    } else {
-                        response[step_count.date] = {}
-                        response[step_count.date].step_count = step_count
-                    }
-                });
-                record.dietary_intake.forEach(dietary_intake => {
-                    if(response[dietary_intake.date]) {
-                        response[dietary_intake.date].dietary_intake = dietary_intake
-                    } else {
-                        response[dietary_intake.date] = {}
-                        response[dietary_intake.date].dietary_intake = dietary_intake
-                    }
-                });
-                record.weight.forEach(weight => {
-                    if(response[weight.date]) {
-                        response[weight.date].weight = weight
-                    } else {
-                        response[weight.date] = {}
-                        response[weight.date].weight = weight
-                    }
-                });
-                record.sleep_patterns.forEach(sleep_patterns => {
-                    if(response[sleep_patterns.date]) {
-                        response[sleep_patterns.date].sleep_patterns = sleep_patterns
-                    } else {
-                        response[sleep_patterns.date] = {}
-                        response[sleep_patterns.date].sleep_patterns = sleep_patterns
-                    }
-                });
-                record.mood.forEach(mood => {
-                    if(response[mood.date]) {
-                        response[mood.date].mood = mood
-                    } else {
-                        response[mood.date] = {}
-                        response[mood.date].mood = mood
-                    }
-                });
-                record.hydration.forEach(hydration => {
-                    if(response[hydration.date]) {
-                        response[hydration.date].hydration = hydration
-                    } else {
-                        response[hydration.date] = {}
-                        response[hydration.date].hydration = hydration
-                    }
-                });
-                record.foot_health_check.forEach(foot_health_check => {
-                    if(response[foot_health_check.date]) {
-                        response[foot_health_check.date].foot_health_check = foot_health_check
-                    } else {
-                        response[foot_health_check.date] = {}
-                        response[foot_health_check.date].foot_health_check = foot_health_check
-                    }
-                });
+    // Function to merge new data into an existing object, arranged date-wise
+    function getGroupedData(records) {
+        response = {};
+        records.forEach((record) => {
+            record.blood_glucose.forEach((bloodGlucose) => {
+                if (response[bloodGlucose.date]) {
+                    response[bloodGlucose.date].blood_glucose = bloodGlucose;
+                } else {
+                    response[bloodGlucose.date] = {};
+                    response[bloodGlucose.date].blood_glucose = bloodGlucose;
+                }
+            });
+            record.medications.forEach((medications) => {
+                if (response[medications.date]) {
+                    response[medications.date].medications = medications;
+                } else {
+                    response[medications.date] = {};
+                    response[medications.date].medications = medications;
+                }
+            });
+            record.insulin_use.forEach((insulin_use) => {
+                if (response[insulin_use.date]) {
+                    response[insulin_use.date].insulin_use = insulin_use;
+                } else {
+                    response[insulin_use.date] = {};
+                    response[insulin_use.date].insulin_use = insulin_use;
+                }
+            });
+            record.blood_pressure.forEach((blood_pressure) => {
+                if (response[blood_pressure.date]) {
+                    response[blood_pressure.date].blood_pressure =
+                        blood_pressure;
+                } else {
+                    response[blood_pressure.date] = {};
+                    response[blood_pressure.date].blood_pressure =
+                        blood_pressure;
+                }
+            });
+            record.physical_activity.forEach((physical_activity) => {
+                if (response[physical_activity.date]) {
+                    response[physical_activity.date].physical_activity =
+                        physical_activity;
+                } else {
+                    response[physical_activity.date] = {};
+                    response[physical_activity.date].physical_activity =
+                        physical_activity;
+                }
+            });
+            record.step_count.forEach((step_count) => {
+                if (response[step_count.date]) {
+                    response[step_count.date].step_count = step_count;
+                } else {
+                    response[step_count.date] = {};
+                    response[step_count.date].step_count = step_count;
+                }
+            });
+            record.dietary_intake.forEach((dietary_intake) => {
+                if (response[dietary_intake.date]) {
+                    response[dietary_intake.date].dietary_intake =
+                        dietary_intake;
+                } else {
+                    response[dietary_intake.date] = {};
+                    response[dietary_intake.date].dietary_intake =
+                        dietary_intake;
+                }
+            });
+            record.weight.forEach((weight) => {
+                if (response[weight.date]) {
+                    response[weight.date].weight = weight;
+                } else {
+                    response[weight.date] = {};
+                    response[weight.date].weight = weight;
+                }
+            });
+            record.sleep_patterns.forEach((sleep_patterns) => {
+                if (response[sleep_patterns.date]) {
+                    response[sleep_patterns.date].sleep_patterns =
+                        sleep_patterns;
+                } else {
+                    response[sleep_patterns.date] = {};
+                    response[sleep_patterns.date].sleep_patterns =
+                        sleep_patterns;
+                }
+            });
+            record.mood.forEach((mood) => {
+                if (response[mood.date]) {
+                    response[mood.date].mood = mood;
+                } else {
+                    response[mood.date] = {};
+                    response[mood.date].mood = mood;
+                }
+            });
+            record.hydration.forEach((hydration) => {
+                if (response[hydration.date]) {
+                    response[hydration.date].hydration = hydration;
+                } else {
+                    response[hydration.date] = {};
+                    response[hydration.date].hydration = hydration;
+                }
+            });
+            record.foot_health_check.forEach((foot_health_check) => {
+                if (response[foot_health_check.date]) {
+                    response[foot_health_check.date].foot_health_check =
+                        foot_health_check;
+                } else {
+                    response[foot_health_check.date] = {};
+                    response[foot_health_check.date].foot_health_check =
+                        foot_health_check;
+                }
+            });
+        });
+        return response;
+    }
+
+    const handleFilter = (event) => {
+        event.preventDefault();
+        let formData = new FormData(event.target);
+        fetchData(
+            currentPage,
+            formData.get("start_date"),
+            formData.get("end_date")
+        );
+    };
+
+    // Function to fetch paginated data from the API
+    function fetchData(page = 1, start_date = "", end_date = "") {
+        fetch(
+            `/api/get-health-data?page=${page}${
+                start_date ? "&start_date=" + start_date : ""
+            }${end_date ? "&end_date=" + end_date : ""}`
+        ) // Adjust the API URL according to your router configuration
+            .then((response) => response.json())
+            .then((data) => {
+                groupedData = getGroupedData(data.results);
+                displayData(groupedData);
+                handlePagination(data);
             })
-            return response;
-        }
+            .catch((error) => console.error("Error fetching data:", error));
+    }
 
-        
+    // Function to display data in the accordion
+    function displayData(records) {
+        accordion.innerHTML = ""; // Clear previous data
 
-        const handleFilter = (event) => {
-            event.preventDefault();
-            let formData = new FormData(event.target);
-            fetchData(currentPage, formData.get("start_date"), formData.get("end_date"));
-        }
+        Object.keys(records).forEach((key, index) => {
+            // Assuming all arrays are of the same size, just use the first array to get the date
+            const date = new Date(key).toLocaleDateString();
 
-        // Function to fetch paginated data from the API
-        function fetchData(page = 1, start_date="", end_date="") {
-            fetch(`/api/get-health-data?page=${page}${start_date ? "&start_date="+start_date: ""}${end_date ? "&end_date="+end_date: ""}`) // Adjust the API URL according to your router configuration
-                .then((response) => response.json())
-                .then((data) => {
-                    groupedData = getGroupedData(data.results)
-                    displayData(groupedData);
-                    handlePagination(data);
-                })
-                .catch((error) => console.error("Error fetching data:", error));
-        }
+            const accordionItem = document.createElement("div");
+            accordionItem.classList.add("accordion-item");
 
-        // Function to display data in the accordion
-        function displayData(records) {
-            accordion.innerHTML = ""; // Clear previous data
-
-            Object.keys(records).forEach((key, index) => {
-                // Assuming all arrays are of the same size, just use the first array to get the date
-                const date = new Date(key).toLocaleDateString();
-                
-                const accordionItem = document.createElement("div");
-                accordionItem.classList.add("accordion-item");
-
-                // Accordion header with the date
-                accordionItem.innerHTML = `
+            // Accordion header with the date
+            accordionItem.innerHTML = `
                 <h2 class="accordion-header" id="heading${index}">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="false" aria-controls="collapse${index}">
                         ${date}
@@ -185,13 +252,13 @@
                     </div>
                 </div>
             `;
-                accordion.appendChild(accordionItem);
-            });
-        }
+            accordion.appendChild(accordionItem);
+        });
+    }
 
-        // Function to format the health data inside the accordion
-        function formatHealthData(record) {
-            return `
+    // Function to format the health data inside the accordion
+    function formatHealthData(record) {
+        return `
             <table class="table">
                 <tbody>
                     <tr>
@@ -199,36 +266,32 @@
                         <td>Fasting: ${
                             record.blood_glucose.glucose_level
                         } mg/dL, 
-                            Time: ${
-                                record.blood_glucose.time_of_reading
-                            }</td>
+                            Time: ${record.blood_glucose.time_of_reading}</td>
                     </tr>
                     <tr>
                         <th>Medications:</th>
-                        <td>${
-                            record.medications.name
-                        }, Dose: ${record.medications.dose}, 
+                        <td>${record.medications.name}, Dose: ${
+            record.medications.dose
+        }, 
                             Missed Dose: ${
                                 record.medications.missed_dose ? "Yes" : "No"
                             }</td>
                     </tr>
                     <tr>
                         <th>Insulin Use:</th>
-                        <td>${
-                            record.insulin_use.insulin_type
-                        }, Dose: ${record.insulin_use.dose_units} Units, 
+                        <td>${record.insulin_use.insulin_type}, Dose: ${
+            record.insulin_use.dose_units
+        } Units, 
                             Time: ${
                                 record.insulin_use.time_of_administration
                             }</td>
                     </tr>
                     <tr>
                         <th>Blood Pressure:</th>
-                        <td>${
-                            record.blood_pressure.systolic
-                        }/${record.blood_pressure.diastolic} mmHg, 
-                            Time: ${
-                                record.blood_pressure.time_of_reading
-                            }</td>
+                        <td>${record.blood_pressure.systolic}/${
+            record.blood_pressure.diastolic
+        } mmHg, 
+                            Time: ${record.blood_pressure.time_of_reading}</td>
                     </tr>
                     <tr>
                         <th>Physical Activity:</th>
@@ -247,9 +310,9 @@
                     </tr>
                     <tr>
                         <th>Dietary Intake:</th>
-                        <td>Meal: ${
-                            record.dietary_intake.meal
-                        }, Carbs: ${record.dietary_intake.carb_intake} g, 
+                        <td>Meal: ${record.dietary_intake.meal}, Carbs: ${
+            record.dietary_intake.carb_intake
+        } g, 
                             Sugary Foods: ${
                                 record.dietary_intake.sugary_foods
                             }</td>
@@ -277,9 +340,7 @@
                     </tr>
                     <tr>
                         <th>Hydration:</th>
-                        <td>Water Intake: ${
-                            record.hydration.water_intake
-                        } L, 
+                        <td>Water Intake: ${record.hydration.water_intake} L, 
                             Dehydration Symptoms: ${
                                 record.hydration.dehydration_symptoms
                                     ? "Yes"
@@ -303,39 +364,71 @@
                 </tbody>
             </table>
         `;
+    }
+
+    // Handle pagination controls
+    function handlePagination(data) {
+        // Enable/Disable previous button
+        if (data.previous) {
+            prevPageBtn.disabled = false;
+        } else {
+            prevPageBtn.disabled = true;
         }
 
-        // Handle pagination controls
-        function handlePagination(data) {
-            // Enable/Disable previous button
-            if (data.previous) {
-                prevPageBtn.disabled = false;
-            } else {
-                prevPageBtn.disabled = true;
-            }
-
-            // Enable/Disable next button
-            if (data.next) {
-                nextPageBtn.disabled = false;
-            } else {
-                nextPageBtn.disabled = true;
-            }
+        // Enable/Disable next button
+        if (data.next) {
+            nextPageBtn.disabled = false;
+        } else {
+            nextPageBtn.disabled = true;
         }
+    }
 
-        // Event listeners for pagination buttons
-        nextPageBtn.addEventListener("click", () => {
-            currentPage += 1;
-            fetchData(currentPage);
+    // Event listeners for pagination buttons
+    nextPageBtn.addEventListener("click", () => {
+        currentPage += 1;
+        fetchData(currentPage);
+    });
+
+    prevPageBtn.addEventListener("click", () => {
+        currentPage -= 1;
+        fetchData(currentPage);
+    });
+
+    $(document).ready(function () {
+        fetchData(currentPage);
+        // Initialize select2 when the modal is shown
+        $("#staticBackdrop").on("shown.bs.modal", function () {
+            $("#doctors").select2({
+                ajax: {
+                    url: '{% url "doctors_dropdown" %}',
+                    dataType: "json",
+                    type: "GET",
+                    // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+                    data: function (params) {
+                        var query = {
+                            search: params.term,
+                        };
+                        return query;
+                    },
+
+                    delay: 250,
+                    processResults: function (data) {
+                        return {
+                            results: data.doctors,
+                        };
+                    },
+                    cache: true,
+                },
+                placeholder: "Select Area",
+                dropdownParent: $("#staticBackdrop"), // Attach the dropdown to the modal to ensure it displays correctly
+            });
         });
 
-        prevPageBtn.addEventListener("click", () => {
-            currentPage -= 1;
-            fetchData(currentPage);
+        // Remove select2 on modal hide to prevent issues if re-opened
+        $("#staticBackdrop").on("hidden.bs.modal", function () {
+            $("#doctors").select2("destroy"); // Optional: destroy select2 instance when modal is hidden
+            $("#doctors").val(null);
         });
-
-        window.onload = () => { 
-            // Initial fetch of the data
-            fetchData(currentPage);
-        }
+    });
     </script>
 {% endblock javascript %}

@@ -30,6 +30,8 @@ urlpatterns = [
     path('', include(router.urls)),
     path('health-data/', health_data_view, name='health_data_view'),
     path("get-health-data", DailyHealthDataView.as_view(), name="get_health_data"),
+    path("manage-data", ManageDailyLogAccess.as_view(), name="manage_data_access"),
+    path("doctors-dropdown", DoctorsDropdown.as_view(), name="doctors_dropdown"),
 ]
 
 urlpatterns.extend(views)
