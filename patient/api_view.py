@@ -12,7 +12,7 @@ from .models import (
     BloodGlucose, Medication, InsulinUse, BloodPressure,
     PhysicalActivity, StepCount, DietaryIntake, Weight,
     SleepPatterns, MoodAndEmotionalWellBeing, Hydration,
-    FootHealthCheck
+    FootHealthCheck, AssignedToDoctor
 )
 from .serializers import (
     BloodGlucoseSerializer, MedicationSerializer, InsulinUseSerializer, BloodPressureSerializer,
@@ -133,32 +133,32 @@ class DailyHealthDataView(APIView):
 
         if start_date and end_date:
             # Collect all data for today (or adjust to fetch data for a different date range if needed)
-            blood_glucose = BloodGlucose.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            medications = Medication.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            insulin_use = InsulinUse.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            blood_pressure = BloodPressure.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            physical_activity = PhysicalActivity.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            step_count = StepCount.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            dietary_intake = DietaryIntake.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            weight = Weight.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            sleep_patterns = SleepPatterns.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            mood = MoodAndEmotionalWellBeing.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            hydration = Hydration.objects.filter(date__range=(start_date, end_date)).order_by('-date')
-            foot_health_check = FootHealthCheck.objects.filter(date__range=(start_date, end_date)).order_by('-date')
+            blood_glucose = BloodGlucose.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            medications = Medication.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            insulin_use = InsulinUse.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            blood_pressure = BloodPressure.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            physical_activity = PhysicalActivity.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            step_count = StepCount.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            dietary_intake = DietaryIntake.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            weight = Weight.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            sleep_patterns = SleepPatterns.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            mood = MoodAndEmotionalWellBeing.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            hydration = Hydration.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
+            foot_health_check = FootHealthCheck.objects.filter(patient=request.user, date__range=(start_date, end_date)).order_by('-date')
         else:
             # Collect all data for today (or adjust to fetch data for a different date range if needed)
-            blood_glucose = BloodGlucose.objects.order_by('-date')
-            medications = Medication.objects.order_by('-date')
-            insulin_use = InsulinUse.objects.order_by('-date')
-            blood_pressure = BloodPressure.objects.order_by('-date')
-            physical_activity = PhysicalActivity.objects.order_by('-date')
-            step_count = StepCount.objects.order_by('-date')
-            dietary_intake = DietaryIntake.objects.order_by('-date')
-            weight = Weight.objects.order_by('-date')
-            sleep_patterns = SleepPatterns.objects.order_by('-date')
-            mood = MoodAndEmotionalWellBeing.objects.order_by('-date')
-            hydration = Hydration.objects.order_by('-date')
-            foot_health_check = FootHealthCheck.objects.order_by('-date')
+            blood_glucose = BloodGlucose.objects.filter(patient=request.user).order_by('-date')
+            medications = Medication.objects.filter(patient=request.user).order_by('-date')
+            insulin_use = InsulinUse.objects.filter(patient=request.user).order_by('-date')
+            blood_pressure = BloodPressure.objects.filter(patient=request.user).order_by('-date')
+            physical_activity = PhysicalActivity.objects.filter(patient=request.user).order_by('-date')
+            step_count = StepCount.objects.filter(patient=request.user).order_by('-date')
+            dietary_intake = DietaryIntake.objects.filter(patient=request.user).order_by('-date')
+            weight = Weight.objects.filter(patient=request.user).order_by('-date')
+            sleep_patterns = SleepPatterns.objects.filter(patient=request.user).order_by('-date')
+            mood = MoodAndEmotionalWellBeing.objects.filter(patient=request.user).order_by('-date')
+            hydration = Hydration.objects.filter(patient=request.user).order_by('-date')
+            foot_health_check = FootHealthCheck.objects.filter(patient=request.user).order_by('-date')
         # Combine all the data into one response
         combined_data = {
             'blood_glucose': blood_glucose,
@@ -202,13 +202,33 @@ class ManageDailyLogAccess(APIView):
     def post(self, request):
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
-        doctors = request.data.get("doctors")
-        print(doctors)
-        if start_date:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        doctor = request.data.get("doctor")
+
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
 
         if end_date:
             print("End Date", end_date)
             end_date = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
         elif start_date:
             end_date = start_date + timedelta(days=1)
+
+        try:
+            assigned_data = AssignedToDoctor.objects.get(patient=request.user, doctor__id=doctor)
+            assigned_data.from_date = start_date
+            assigned_data.to_date = end_date
+        except AssignedToDoctor.DoesNotExist:
+            try:
+                assigned_data = AssignedToDoctor.objects.create(patient=request.user, doctor=User.objects.get(id=doctor), from_date=start_date, to_date=end_date)
+            except User.DoesNotExist:
+                return Response({
+                    "error": "Invalid doctor id"
+                }, status=500)
+        return Response({
+            'assigned_data': {
+                "doctor": assigned_data.doctor.first_name,
+                "patient": request.user.first_name,
+                "from_date": assigned_data.from_date.strftime("%Y-%m-%d"),
+                "to_date": assigned_data.to_date.strftime("%Y-%m-%d"),
+                "msg": "Assigned daily log to %s from %s to %s" % (assigned_data.doctor.first_name, assigned_data.from_date.strftime("%Y-%m-%d"), assigned_data.to_date.strftime("%Y-%m-%d"))
+            }
+        })

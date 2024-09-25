@@ -32,4 +32,12 @@ class User(AbstractUser):
     role = models.CharField(choices=[(UserType.Admin, UserType.Admin.title()), (UserType.Doctor, UserType.Doctor.title()), (UserType.Patient, UserType.Patient.title())], max_length=10)
     objects = UserManager()
 
+    @property
+    def is_patient(self):
+        return self.role == "Patient"
+
+    @property
+    def is_doctor(self):
+        return self.role == "Doctor"
+
 

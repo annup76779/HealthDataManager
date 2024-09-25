@@ -84,10 +84,8 @@ class AuthService {
 
             if (response.ok) {
                 const data = await response.json();
-                alert(data.role === "Patient");
                 if (data.role === "Doctor") {
-                    // window.location.href = "/auth/doctor_home";
-                    alert("Docter Logged in successfully");
+                    window.location.href = "/api/doctor/home";
                 } else if (data.role === "Patient") {
                     // Redirect to home page after successful signup
                     window.location.href = "/api/health-data/";

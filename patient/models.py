@@ -1,5 +1,7 @@
 from django.db import models
 
+from account.models import User
+
 
 class BloodGlucose(models.Model):
     FASTING = 'Fasting'
@@ -15,6 +17,7 @@ class BloodGlucose(models.Model):
     reading_type = models.CharField(max_length=20, choices=READING_TYPE_CHOICES)
     glucose_level = models.DecimalField(max_digits=5, decimal_places=2)  # supports both mg/dL and mmol/L
     time_of_reading = models.TimeField()
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
@@ -28,6 +31,7 @@ class Medication(models.Model):
     dose = models.DecimalField(max_digits=5, decimal_places=2)
     time_taken = models.TimeField()
     missed_dose = models.BooleanField(default=False)
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
@@ -44,6 +48,7 @@ class InsulinUse(models.Model):
     dose_units = models.DecimalField(max_digits=5, decimal_places=2)
     time_of_administration = models.TimeField()
     injection_site = models.CharField(max_length=100, blank=True, null=True)  # Optional field
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
@@ -51,6 +56,7 @@ class BloodPressure(models.Model):
     systolic = models.PositiveIntegerField()  # mmHg
     diastolic = models.PositiveIntegerField()  # mmHg
     time_of_reading = models.TimeField()
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
@@ -81,12 +87,14 @@ class PhysicalActivity(models.Model):
     duration = models.PositiveIntegerField()  # Minutes
     intensity = models.CharField(max_length=20, choices=INTENSITY_CHOICES)
     time_of_exercise = models.TimeField()
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
 class StepCount(models.Model):
     total_steps = models.PositiveIntegerField()
     daily_goal = models.PositiveIntegerField(blank=True, null=True)  # Optional
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
@@ -107,12 +115,14 @@ class DietaryIntake(models.Model):
     carb_intake = models.DecimalField(max_digits=5, decimal_places=2)  # Grams
     sugary_foods = models.TextField(blank=True, null=True)  # Optional field
     time_of_meal = models.TimeField()
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
 class Weight(models.Model):
     weight = models.DecimalField(max_digits=5, decimal_places=2)  # kg or lbs
     date = models.DateField(auto_now_add=True)
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
 
 class SleepPatterns(models.Model):
@@ -130,18 +140,21 @@ class SleepPatterns(models.Model):
     sleep_quality = models.CharField(max_length=10, choices=SLEEP_QUALITY_CHOICES)
     wake_up_time = models.TimeField()
     bedtime = models.TimeField()
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
 class MoodAndEmotionalWellBeing(models.Model):
     mood_rating = models.PositiveIntegerField()  # 1–10 scale
     notable_events = models.TextField(blank=True, null=True)  # Optional
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
 class Hydration(models.Model):
     water_intake = models.DecimalField(max_digits=4, decimal_places=2)  # Liters or glasses
     dehydration_symptoms = models.BooleanField(default=False)
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
 
 
@@ -149,4 +162,16 @@ class FootHealthCheck(models.Model):
     foot_check_completed = models.BooleanField(default=False)
     abnormalities = models.TextField(blank=True, null=True)  # Optional field for abnormalities like swelling, sores
     pain_level = models.PositiveIntegerField(blank=True, null=True)  # Optional, 1–10 scale
+    patient = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     date = models.DateField(auto_now_add=True)
+
+
+class AssignedToDoctor(models.Model):
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="assigned_logs", primary_key=True)
+    patient = models.ForeignKey(User, on_delete=models.CASCADE)
+    from_date = models.DateField()
+    to_date = models.DateField()
+    assigned_date = models.DateField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('patient', 'doctor')
