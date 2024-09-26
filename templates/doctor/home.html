@@ -163,12 +163,7 @@
                     </tr>
                     <tr>
                         <th>Dietary Intake:</th>
-                        <td>Meal: ${record.dietary_intake.meal}, Carbs: ${
-            record.dietary_intake.carb_intake
-        } g, 
-                            Sugary Foods: ${
-                                record.dietary_intake.sugary_foods
-                            }</td>
+                        <td>${record.dietary_intake.map(diet => 'Meal: ' + diet.meal+', Carbs: ' + diet.carb_intake +'g, Sugary Foods: '+ diet.sugary_foods).join('<br />')}</td>
                     </tr>
                     <tr>
                         <th>Weight:</th>
@@ -218,7 +213,6 @@
             </table>
         `;
     }
-
     // Handle pagination controls
     function handlePagination(data) {
         // Enable/Disable previous button

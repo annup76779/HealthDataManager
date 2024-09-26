@@ -188,7 +188,7 @@ class DoctorsDropdown(APIView):
 
     def get(self, request):
         search = request.GET.get("search")
-        userObjs = User.objects
+        userObjs = User.objects.filter(role="Doctor")
         if search and search.strip():
             userObjs = userObjs.filter(Q(username__icontains=search.strip()) | Q(first_name__icontains=search.strip()))
 
@@ -216,9 +216,11 @@ class ManageDailyLogAccess(APIView):
             assigned_data = AssignedToDoctor.objects.get(patient=request.user, doctor__id=doctor)
             assigned_data.from_date = start_date
             assigned_data.to_date = end_date
+            assigned_data.save()
         except AssignedToDoctor.DoesNotExist:
             try:
-                assigned_data = AssignedToDoctor.objects.create(patient=request.user, doctor=User.objects.get(id=doctor), from_date=start_date, to_date=end_date)
+                doctor_obj = User.objects.get(id=doctor)
+                assigned_data = AssignedToDoctor.objects.create(patient=request.user, doctor=doctor_obj, from_date=start_date, to_date=end_date)
             except User.DoesNotExist:
                 return Response({
                     "error": "Invalid doctor id"

@@ -62,16 +62,26 @@ class LogsData(APIView):
 
         for class_name_srlz in class_serializer_array:
             class_name, srlz, key = class_name_srlz
-            objs = pagination.paginate_queryset(class_name.objects.filter(patient=assigned_logs.patient, date__range=(assigned_logs.from_date, assigned_logs.to_date)), request)
+            if key == 'dietary_intake':
+                pagination.page_size = pagination.page_size * 4
+            else:
+                pagination.page_size = 10
+            objs = pagination.paginate_queryset(class_name.objects.filter(patient=assigned_logs.patient, date__range=(assigned_logs.from_date, assigned_logs.to_date + timedelta(days=1))), request)
             for obj in objs:
                 date_key = obj.date.strftime("%Y-%m-%d")
                 if obj.date.strftime("%Y-%m-%d") in logs.keys():
-                    logs[date_key][key] = self.object_serialize(obj, srlz)
+                    if key == "dietary_intake":
+                        if isinstance(logs[date_key].get(key), (list, tuple)):
+                            logs[date_key][key].append(self.object_serialize(obj, srlz))
+                        else:
+                            logs[date_key][key] = [self.object_serialize(obj, srlz)]
+                    else:
+                        logs[date_key][key] = self.object_serialize(obj, srlz)
                 else:
                     logs[date_key] = copy(block_log)
-                    logs[date_key][key] = self.object_serialize(obj, srlz)
+                    logs[date_key][key] = self.object_serialize(obj, srlz) if key != "dietary_intake" else [self.object_serialize(obj, srlz)]
 
-        count = BloodGlucose.objects.filter(patient=assigned_logs.patient, date__range=(assigned_logs.from_date, assigned_logs.to_date)).count()
+        count = BloodGlucose.objects.filter(patient=assigned_logs.patient, date__range=(assigned_logs.from_date, assigned_logs.to_date + timedelta(days=1))).count()
         try:
             page = int(request.query_params.get("page", 1))
         except ValueError:

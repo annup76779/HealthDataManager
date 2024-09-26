@@ -167,7 +167,7 @@ class FootHealthCheck(models.Model):
 
 
 class AssignedToDoctor(models.Model):
-    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="assigned_logs", primary_key=True)
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="assigned_logs")
     patient = models.ForeignKey(User, on_delete=models.CASCADE)
     from_date = models.DateField()
     to_date = models.DateField()
