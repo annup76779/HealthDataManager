@@ -168,12 +168,14 @@
             });
             record.dietary_intake.forEach((dietary_intake) => {
                 if (response[dietary_intake.date]) {
-                    response[dietary_intake.date].dietary_intake =
-                        dietary_intake;
+                    if (response[dietary_intake.date].dietary_intake)
+                        response[dietary_intake.date].dietary_intake.push(dietary_intake);
+                    else
+                        response[dietary_intake.date].dietary_intake = [dietary_intake];
                 } else {
                     response[dietary_intake.date] = {};
                     response[dietary_intake.date].dietary_intake =
-                        dietary_intake;
+                        [dietary_intake];
                 }
             });
             record.weight.forEach((weight) => {
@@ -221,6 +223,7 @@
                 }
             });
         });
+        console.log(response);
         return response;
     }
 
@@ -332,12 +335,7 @@
                     </tr>
                     <tr>
                         <th>Dietary Intake:</th>
-                        <td>Meal: ${record.dietary_intake.meal}, Carbs: ${
-            record.dietary_intake.carb_intake
-        } g, 
-                            Sugary Foods: ${
-                                record.dietary_intake.sugary_foods
-                            }</td>
+                        <td>${record.dietary_intake.map(diet => 'Meal: ' + diet.meal+', Carbs: ' + diet.carb_intake +'g, Sugary Foods: '+ diet.sugary_foods).join('<br />')}</td>
                     </tr>
                     <tr>
                         <th>Weight:</th>

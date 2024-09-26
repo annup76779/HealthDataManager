@@ -7,7 +7,26 @@ from .models import (
 )
 
 
-class BloodGlucoseForm(forms.ModelForm):
+class CustomModelForm(forms.ModelForm):
+    # Override the save method to add the user before saving
+    def save(self, commit=True, user=None, field_value=None):
+        if field_value is None:
+            field_value = {}
+        instance = super().save(commit=False)
+        if user:
+            instance.patient = user  # Set the user
+        if field_value.__len__() > 0:
+            for key, value in field_value.items():
+                try:
+                    setattr(instance, key, value)
+                except AttributeError:
+                    pass
+        if commit:
+            instance.save()
+        return instance
+
+
+class BloodGlucoseForm(CustomModelForm):
     class Meta:
         model = BloodGlucose
         fields = ['reading_type', 'glucose_level', 'time_of_reading']
@@ -16,7 +35,7 @@ class BloodGlucoseForm(forms.ModelForm):
         }
 
 
-class MedicationForm(forms.ModelForm):
+class MedicationForm(CustomModelForm):
     class Meta:
         model = Medication
         fields = ['name', 'dose', 'time_taken', 'missed_dose']
@@ -25,7 +44,7 @@ class MedicationForm(forms.ModelForm):
         }
 
 
-class InsulinUseForm(forms.ModelForm):
+class InsulinUseForm(CustomModelForm):
     class Meta:
         model = InsulinUse
         fields = ['insulin_type', 'dose_units', 'time_of_administration', 'injection_site']
@@ -34,7 +53,7 @@ class InsulinUseForm(forms.ModelForm):
         }
 
 
-class BloodPressureForm(forms.ModelForm):
+class BloodPressureForm(CustomModelForm):
     class Meta:
         model = BloodPressure
         fields = ['systolic', 'diastolic', 'time_of_reading']
@@ -43,7 +62,7 @@ class BloodPressureForm(forms.ModelForm):
         }
 
 
-class PhysicalActivityForm(forms.ModelForm):
+class PhysicalActivityForm(CustomModelForm):
     class Meta:
         model = PhysicalActivity
         fields = ['exercise_type', 'duration', 'intensity', 'time_of_exercise']
@@ -52,28 +71,28 @@ class PhysicalActivityForm(forms.ModelForm):
         }
 
 
-class StepCountForm(forms.ModelForm):
+class StepCountForm(CustomModelForm):
     class Meta:
         model = StepCount
         fields = ['total_steps', 'daily_goal']
 
 
-class DietaryIntakeForm(forms.ModelForm):
+class DietaryIntakeForm(CustomModelForm):
     class Meta:
         model = DietaryIntake
-        fields = ['meal', 'carb_intake', 'sugary_foods', 'time_of_meal']
+        fields = ['carb_intake', 'sugary_foods', 'time_of_meal']
         widgets = {
             'time_of_meal': forms.TimeInput(attrs={'type': 'time'}),
         }
 
 
-class WeightForm(forms.ModelForm):
+class WeightForm(CustomModelForm):
     class Meta:
         model = Weight
         fields = ['weight']
 
 
-class SleepPatternsForm(forms.ModelForm):
+class SleepPatternsForm(CustomModelForm):
     class Meta:
         model = SleepPatterns
         fields = ['sleep_duration', 'sleep_quality', 'wake_up_time', 'bedtime']
@@ -83,19 +102,23 @@ class SleepPatternsForm(forms.ModelForm):
         }
 
 
-class MoodAndEmotionalWellBeingForm(forms.ModelForm):
+class MoodAndEmotionalWellBeingForm(CustomModelForm):
     class Meta:
         model = MoodAndEmotionalWellBeing
         fields = ['mood_rating', 'notable_events']
 
+        labels = {
+            'mood_rating': 'Mood Rating (1 lowest / 10 highest)'
+        }
 
-class HydrationForm(forms.ModelForm):
+
+class HydrationForm(CustomModelForm):
     class Meta:
         model = Hydration
         fields = ['water_intake', 'dehydration_symptoms']
 
 
-class FootHealthCheckForm(forms.ModelForm):
+class FootHealthCheckForm(CustomModelForm):
     class Meta:
         model = FootHealthCheck
         fields = ['foot_check_completed', 'abnormalities', 'pain_level']
