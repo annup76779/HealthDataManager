@@ -44,7 +44,9 @@
                                            href="{% url "get_daily_details" %}">History</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                                        <a class="nav-link active"
+                                           aria-current="page"
+                                           href="{% url "manage_doctor_access" %}">Manage Access</a>
                                     </li>
                                 </ul>
                                 <a class="nav-link active" aria-current="page" href="{% url "logout" %}">Logout</a>
@@ -70,7 +72,9 @@
                             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                                     <li class="nav-item">
-                                        <a class="nav-link active" aria-current="page" href="{% url "doctor-home" %}">Home</a>
+                                        <a class="nav-link active"
+                                           aria-current="page"
+                                           href="{% url "doctor-home" %}">Home</a>
                                     </li>
                                 </ul>
                                 <a class="nav-link active" aria-current="page" href="{% url "logout" %}">Logout</a>

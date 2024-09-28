@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from .forms import (
     BloodGlucoseForm, MedicationForm, InsulinUseForm, BloodPressureForm,
@@ -9,7 +10,7 @@ from .forms import (
 )
 from .models import (
     BloodGlucose, Medication, InsulinUse, BloodPressure, PhysicalActivity, StepCount, DietaryIntake,
-    Weight, SleepPatterns, MoodAndEmotionalWellBeing, Hydration, FootHealthCheck
+    Weight, SleepPatterns, MoodAndEmotionalWellBeing, Hydration, FootHealthCheck, AssignedToDoctor
 )
 from django.utils import timezone
 from django.contrib import messages
@@ -126,3 +127,20 @@ def health_data_view(request):
     }
 
     return render(request, 'patient/add_daily_details.html', context)
+
+
+@login_required
+def manage_doctor_access(request, doctor=None):
+    if request.method == "DELETE":
+        if doctor is not None:
+            try:
+                access_to_doctor = AssignedToDoctor.objects.get(patient=request.user, pk=doctor)
+                access_to_doctor.delete()
+                return JsonResponse({"msg": "Successfully deleted!"}, status=200)
+            except AssignedToDoctor.DoesNotExist:
+                return JsonResponse({'error': "No such record"}, status=400)
+            except Exception as error:
+                return JsonResponse({'error': "Something went wrong"}, status=500)
+    assigned_doctors = AssignedToDoctor.objects.filter(patient=request.user).all()
+    return render(request, 'patient/manage_doctor_access.html', {"assignments":assigned_doctors})
+

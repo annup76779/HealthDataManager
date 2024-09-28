@@ -1,0 +1,36 @@
+{% extends "../index.html" %}
+{% block content %}
+    {% csrf_token %}
+    <div class="container">
+        <h3>Doctors having your data</h3>
+        <div class="col-12">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Sr. No.</th>
+                        <th>Doctor Name</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th>Last Updated</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in assignments %}
+                        <tr id="doctor-access-{{ item.id }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ item.doctor.first_name }}</td>
+                            <td>{{ item.from_date|date:"SHORT_DATE_FORMAT" }}</td>
+                            <td>{{ item.to_date|date:"SHORT_DATE_FORMAT" }}</td>
+                            <td>{{ item.assigned_date|date:"SHORT_DATE_FORMAT" }}</td>
+                            <td>
+                                <span class="badge rounded-pill text-bg-danger"
+                                      onclick="deleteAccessToDoctor({{ item.id }})">Delete</span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock content %}

@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from patient.api_view import *
-from patient.views import add_daily_details, get_daily_details, health_data_view
+from patient.views import add_daily_details, get_daily_details, health_data_view, manage_doctor_access
 
 views = [
     path("add_daily_details", add_daily_details, name="daily_details"),
@@ -32,6 +32,8 @@ urlpatterns = [
     path("get-health-data", DailyHealthDataView.as_view(), name="get_health_data"),
     path("manage-data", ManageDailyLogAccess.as_view(), name="manage_data_access"),
     path("doctors-dropdown", DoctorsDropdown.as_view(), name="doctors_dropdown"),
+    path("manage_doctor_access", manage_doctor_access, name="manage_doctor_access"),
+    path("delete_doctor_access/<int:doctor>", manage_doctor_access, name="delete_doctor_access")
 ]
 
 urlpatterns.extend(views)

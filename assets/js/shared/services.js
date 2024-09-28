@@ -16,3 +16,27 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+function deleteAccessToDoctor(doctor_id) {
+    fetch(`/api/delete_doctor_access/${doctor_id}`, {
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector(
+                "input[name=csrfmiddlewaretoken]"
+            ).value,
+        },
+        method: "DELETE",
+    })
+        .then(function (response) {
+            if (response.ok) {
+                let row = document.querySelector(`#doctor-access-${doctor_id}`);
+                row.remove();
+                notification.success("Removed doctor's access");
+            } else {
+                notification.error("Failed to remove doctor's access");
+            }
+        })
+        .catch(function (error) {
+            notification.error("Failed to remove doctor's access");
+        });
+}
